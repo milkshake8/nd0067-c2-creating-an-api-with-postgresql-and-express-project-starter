@@ -5,8 +5,8 @@ import token_verifier from '../middlewares/tkverifier'
 const store = new ProductStore()
 
 const index = async (_req: Request, res: Response) => {
-  const products: Product[] = await store.index()
   try {
+    const products: Product[] = await store.index()
     res.json(products)
   } catch (err) {
     res.status(400)
