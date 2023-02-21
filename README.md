@@ -1,54 +1,129 @@
-# Storefront Backend Project
+## Usage
 
-## Getting Started
+In order to run this, you will need to install Docker on your machine to use the database
 
-This repo contains a basic Node and Express app to get you started in constructing an API. To get started, clone this repo and run `yarn` in your terminal at the project root.
+### Setting up the environment
 
-## Required Technologies
-Your application must make use of the following libraries:
-- Postgres for the database
-- Node/Express for the application logic
-- dotenv from npm for managing environment variables
-- db-migrate from npm for migrations
-- jsonwebtoken from npm for working with JWTs
-- jasmine from npm for testing
+Inside the repository's main directory, create a plain text file named '.env'
+that will hold the configuration. The file should look like this:
 
-## Steps to Completion
+```
+POSTGRES_HOST= 127.0.0.1
+POSTGRES_DB= storefront
+POSTGRES_TEST_DB= storefront_test
+POSTGRES_USER= storefront_user
+POSTGRES_PASSWORD= password123
+ENV= dev
+BCRYPT_PASSWORD= storefront-password-salt
+SALT_ROUNDS= 10
+TOKEN_SECRET= storefront-token
+```
 
-### 1. Plan to Meet Requirements
+### Setting up docker and postgresql
 
-In this repo there is a `REQUIREMENTS.md` document which outlines what this API needs to supply for the frontend, as well as the agreed upon data shapes to be passed between front and backend. This is much like a document you might come across in real life when building or extending an API. 
+After the Docker installation completed you will want to run the following commands to setup databases for tests and production.
+First thing first open a new terminal and get to the project root repository!
 
-Your first task is to read the requirements and update the document with the following:
-- Determine the RESTful route for each endpoint listed. Add the RESTful route and HTTP verb to the document so that the frontend developer can begin to build their fetch requests.    
-**Example**: A SHOW route: 'blogs/:id' [GET] 
+1. Run `sudo docker compose up` to set up the the used container to run the databases
+2. While the container is running you need another terminal and run `sudo docker exec -ti container_name bash` to get into the container
+3. Run `su postgres` to connect as postgres user
+4. Run `psql --dbname=storefront --host=127.0.0.1 --username=storefront_user -W` and then when prompted type `password123` to connect to our main database
+5. Now we need to create a new database to execute our tests; run `CREATE DATABASE storefront_test;`
 
-- Design the Postgres database tables based off the data shape requirements. Add to the requirements document the database tables and columns being sure to mark foreign keys.   
-**Example**: You can format this however you like but these types of information should be provided
-Table: Books (id:varchar, title:varchar, author:varchar, published_year:varchar, publisher_id:string[foreign key to publishers table], pages:number)
+### Install the modules
 
-**NOTE** It is important to remember that there might not be a one to one ratio between data shapes and database tables. Data shapes only outline the structure of objects being passed between frontend and API, the database may need multiple tables to store a single shape. 
+Run `npm run install` to install all required modules.
 
-### 2.  DB Creation and Migrations
+### Run the automated tests
 
-Now that you have the structure of the databse outlined, it is time to create the database and migrations. Add the npm packages dotenv and db-migrate that we used in the course and setup your Postgres database. If you get stuck, you can always revisit the database lesson for a reminder. 
+Run `npm run test` to build the serer and run Jasmine tests as often as you
+would like.
 
-You must also ensure that any sensitive information is hashed with bcrypt. If any passwords are found in plain text in your application it will not pass.
+### Run the server
 
-### 3. Models
+#### Building
 
-Create the models for each database table. The methods in each model should map to the endpoints in `REQUIREMENTS.md`. Remember that these models should all have test suites and mocks.
+1. Run `db-migrate up` to set up the regular database tables.
+2. Run `npm run build` to build the server.
+3. Run `npm run start` to run the server.
 
-### 4. Express Handlers
+#### Using
 
-Set up the Express handlers to route incoming requests to the correct model method. Make sure that the endpoints you create match up with the enpoints listed in `REQUIREMENTS.md`. Endpoints must have tests and be CORS enabled. 
+The database will run on port 5432. You can access the server on localhost on
+port 3000 (unless you change it in in `.env`), so http://localhost:3000.
+From now you can navigate in the server!
 
-### 5. JWTs
+##### Users routes
 
-Add JWT functionality as shown in the course. Make sure that JWTs are required for the routes listed in `REQUIUREMENTS.md`.
+- Create: [post] http://localhost:3000/users to create a user.
+  Parameters are: `first_name`, `last_name` and `password`.
+  You will receive a JWT that is required for accessing most other routes.
+- Index: [get] http://localhost:3000/users while providing authorization
+  will list all users.
+- Show: [get] http://localhost:3000/users/:id while providing authorization
+  will list the information for the user with the `id`.
+- Edit: [put] http://localhost:3000/users/:id while providing authorization
+  With parameter: `new_lastname`
+  will edit the user with the `id` and set `last_name` to the new last name
+- Delete: [delete] http://localhost:3000/users/:id while providing
+  authorization will delete the user with the `id`.
+- Authenticate: [post] http://localhost:3000/user/:id to connect as the user
+  with `id`.Parameters are: `firstname` & `password`
 
-### 6. QA and `README.md`
+##### Products routes
 
-Before submitting, make sure that your project is complete with a `README.md`. Your `README.md` must include instructions for setting up and running your project including how you setup, run, and connect to your database. 
+- Index: [get] http://localhost:3000/products to get a list of all
+  products.
+- Show: [get] http://localhost:3000/products/:id to get the product with
+  `id`.
+- Show by category: [get] http://localhost:3000/products/categories/:category
+  to get the products with`category`.
+- Create: [post] http://localhost:3000/products while providing
+  authorization to create a product.
+  Parameters are: `name`, `price` and `category`.
+- Edit: [put] http://localhost:3000/products/:id while providing
+  authorization to edit a product with `id`. Parameters are: `name`.
+- Delete: [delete] http://localhost:3000/products/:id while providing
+  authorization to delete a product with `id`.
 
-Before submitting your project, spin it up and test each endpoint. If each one responds with data that matches the data shapes from the `REQUIREMENTS.md`, it is ready for submission!
+##### Order routes
+
+- Index: [get] http://localhost:3000/orders while providing authorization
+  to get a list of all orders.
+- Show: [get] http://localhost:3000/orders/:user_id while providing
+  authorization to get the order with the `id`.
+- Create: [post] http://localhost:3000/orders while providing
+  authorization to create an order. Parameters are: `user_id` and `status`.
+- Edit: [put] http://localhost:3000/orders/:id while providing
+  authorization to edit an order with `id`. Parameters are: `user_id` and
+  `status`.
+- Delete: [delete] http://localhost:3000/orders/:id while providing
+  authorization to delete an order with `id`.
+- Current orders: [get] http://localhost:3000/current_orders/:user_id while providing
+  authorization to get the current order of the user with the id: `user_id`
+- Complete orders: [get] http://localhost:3000/complete_orders/:user_id while providing
+  authorization to get the complete orders of the user with the id: `user_id`
+
+##### Order product routes
+
+- Index: [get] http://localhost:3000/orderproducts while providing authorization
+  to get a list of all order/product combinations.
+- Show: [get] http://localhost:3000/orderproducts/:id while providing
+  authorization to get order/product combination with `id`.
+- Create: [post] http://localhost:3000/orderproducts while providing
+  authorization to add a product with parameters: `product_id`,`order_id` & `quantity`.
+- Edit: [put] http://localhost:3000/orderproducts/:id while providing
+  authorization to edit a product/order combination with `id`. Parameters are
+  `product_id`, `order_id` and `quantity`.
+- Delete: [delete] http://localhost:3000/orderproducts/:id while providing
+  authorization to delete an order/product combination with `id`.
+
+##### Services routes
+
+- Most popular products: [get] http://localhost:3000//most_popular_products
+  to get list of the 5 most popular products
+
+#### Deconstruction
+
+1. Run `db-migrate reset` to drop the regular database tables.
+2. Run `sudo docker compose down -v` to delete the databases(storefront & storefront_test) and the container
