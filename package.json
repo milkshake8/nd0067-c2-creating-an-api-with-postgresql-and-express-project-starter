@@ -45,5 +45,14 @@
     "supertest": "^6.3.3",
     "ts-node": "^9.1.1",
     "tsc-watch": "^4.6.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/udacity/nd0067-c2-creating-an-api-with-postgresql-and-express-project-starter.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/udacity/nd0067-c2-creating-an-api-with-postgresql-and-express-project-starter/issues"
+  },
+  "homepage": "https://github.com/udacity/nd0067-c2-creating-an-api-with-postgresql-and-express-project-starter#readme"
 }
